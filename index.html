@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Конвертер величин</title>
+  <meta name="description" content="Конвертер физических величин, поверочные расчёты и калькулятор-лента">
+  <meta name="theme-color" content="#0a64c8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Конвертер">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="appbar"><h1 id="title">Конвертер</h1></header>
+
+  <main>
+    <section id="conv" class="page"></section>
+    <section id="flow" class="page" hidden></section>
+    <section id="gas" class="page" hidden></section>
+    <section id="verify" class="page" hidden></section>
+    <section id="calc" class="page" hidden></section>
+  </main>
+
+  <nav class="tabbar" aria-label="Разделы">
+    <button data-tab="conv" data-title="Конвертер">
+      <svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg><span>Единицы</span>
+    </button>
+    <button data-tab="flow" data-title="Объёмный ↔ массовый расход">
+      <svg viewBox="0 0 24 24"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/></svg><span>Расход</span>
+    </button>
+    <button data-tab="gas" data-title="Расход газа: раб. ↔ ст. условия">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 13l4-3M12 3v3"/></svg><span>Газ</span>
+    </button>
+    <button data-tab="verify" data-title="Поверка">
+      <svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg><span>Поверка</span>
+    </button>
+    <button data-tab="calc" data-title="Калькулятор">
+      <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg><span>Калькулятор</span>
+    </button>
+  </nav>
+
+  <div id="keypad" hidden></div>
+  <div id="modal" hidden><div class="sheet"></div></div>
+  <div id="toast" hidden></div>
+
+  <script src="units.js"></script>
+  <script src="calc.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

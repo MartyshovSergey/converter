@@ -1,0 +1,200 @@
+:root {
+  --bg: #f2f3f7;
+  --card: #ffffff;
+  --text: #1c1c1e;
+  --muted: #6e6e73;
+  --line: #e1e3ea;
+  --accent: #0a64c8;
+  --accent-weak: #e6f0fb;
+  --to: #fff3cd;
+  --err: #c00000;
+  --ok: #0a7d20;
+  --key: #ffffff;
+  --key2: #e3e7ee;
+  --keypad: #d3d7de;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .06);
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --tabbar-h: 58px;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --card: #1c1c1e;
+    --text: #f2f2f7;
+    --muted: #98989f;
+    --line: #2f2f33;
+    --accent: #4ea1ff;
+    --accent-weak: #102a47;
+    --to: #3a3216;
+    --err: #ff6b6b;
+    --ok: #4cd964;
+    --key: #3a3a3c;
+    --key2: #2c2c2e;
+    --keypad: #1c1c1e;
+    --shadow: none;
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.35 -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif;
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px);
+}
+body.keypad-open { padding-bottom: calc(var(--keypad-h, 300px) + 16px); }
+[hidden] { display: none !important; }
+
+.appbar {
+  position: sticky; top: 0; z-index: 5;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  padding: calc(env(safe-area-inset-top) + 10px) 16px 8px;
+}
+.appbar h1 { margin: 0; font-size: 22px; font-weight: 700; }
+
+main { max-width: 760px; margin: 0 auto; padding: 4px 16px 0; }
+
+/* ---------- общие элементы ---------- */
+.card {
+  background: var(--card); border-radius: 12px; padding: 12px 14px; margin: 0 0 12px;
+  box-shadow: var(--shadow);
+}
+.field { margin: 0 0 10px; }
+.field > label { display: block; font-size: 13px; color: var(--muted); margin: 0 0 4px 2px; }
+.hint { font-size: 12.5px; color: var(--muted); margin: 3px 2px 0; }
+.row { display: flex; gap: 8px; align-items: center; }
+.grow { flex: 1; min-width: 0; }
+
+input, select, button { font: inherit; color: inherit; }
+input[type=text], select {
+  width: 100%; min-height: 44px; padding: 8px 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--card);
+  font-size: 17px;
+}
+select { -webkit-appearance: none; appearance: none; padding-right: 32px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
+input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+.btn {
+  min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--card); color: var(--accent); font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.btn:active { background: var(--accent-weak); }
+.btn.small { min-height: 34px; padding: 0 10px; font-size: 14px; }
+.btn.pm { min-width: 48px; padding: 0; font-size: 19px; color: var(--text); }
+
+.result {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--accent-weak); border-radius: 12px; padding: 10px 12px; margin: 0 0 10px;
+}
+.result .val { flex: 1; min-width: 0; font-size: 24px; font-weight: 700; color: var(--accent); overflow-wrap: anywhere; }
+.result .lbl { font-size: 12.5px; color: var(--muted); }
+.info { font-size: 14px; color: var(--muted); white-space: pre-line; margin: 2px 2px 12px; }
+.info.ok { color: var(--ok); font-weight: 600; }
+.info.bad { color: var(--err); font-weight: 600; }
+
+.swap { display: flex; justify-content: center; margin: -2px 0 8px; }
+
+.list { list-style: none; margin: 0; padding: 0; background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+.list li { display: flex; gap: 10px; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 15px; cursor: pointer; }
+.list li:first-child { border-top: 0; }
+.list li .v { font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; white-space: nowrap; }
+.list li .n { min-width: 0; overflow-wrap: anywhere; }
+.list li.from { background: var(--accent-weak); }
+.list li.to { background: var(--to); }
+.list li.head { background: var(--bg); color: var(--accent); font-weight: 700; font-size: 13px; cursor: default; }
+
+.seg { display: flex; background: var(--key2); border-radius: 10px; padding: 3px; gap: 3px; margin: 0 0 10px; }
+.seg button { flex: 1; border: 0; background: transparent; border-radius: 8px; padding: 8px 6px; font-size: 14px; cursor: pointer; }
+.seg button.on { background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.15); font-weight: 600; }
+
+/* ---------- нижние вкладки ---------- */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  display: flex; justify-content: space-around;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding: 4px 4px env(safe-area-inset-bottom);
+}
+.tabbar button {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  border: 0; background: none; color: var(--muted); font-size: 10.5px; padding: 4px 0 6px; cursor: pointer;
+}
+.tabbar svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tabbar button.on { color: var(--accent); }
+body.keypad-open .tabbar { display: none; }
+
+/* ---------- калькулятор-лента ---------- */
+.calc-bar { display: flex; gap: 6px; margin: 0 0 8px; overflow-x: auto; scrollbar-width: none; }
+.calc-bar::-webkit-scrollbar { display: none; }
+.calc-bar > * { flex: none; }
+.calc-bar select { width: auto; min-height: 34px; padding: 4px 28px 4px 10px; font-size: 14px; }
+.calc-sum {
+  position: sticky; top: calc(env(safe-area-inset-top) + 48px); z-index: 4;
+  display: flex; align-items: center; gap: 8px; margin: 0 0 8px;
+  background: var(--accent-weak); border-radius: 12px; padding: 6px 8px 6px 12px;
+}
+.calc-sum .val { flex: 1; min-width: 0; font: 700 20px var(--mono); color: var(--accent); overflow-wrap: anywhere; }
+
+.tape { background: var(--card); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.trow {
+  display: grid; grid-template-columns: 30px 1fr auto; grid-template-areas: "num note res" "num expr expr";
+  border-top: 1px solid var(--line); padding: 4px 10px 4px 0; scroll-margin-bottom: calc(var(--keypad-h, 300px) + 12px);
+}
+.trow:first-child { border-top: 0; }
+.trow.active { background: color-mix(in srgb, var(--accent-weak) 55%, transparent); }
+.tnum { grid-area: num; color: var(--muted); font-size: 12px; text-align: right; padding: 8px 6px 0 0; }
+.trow .tnote { grid-area: note; border: 0; border-radius: 0; background: transparent; min-height: 0; padding: 4px 4px 0; font-size: 16px; color: var(--muted); min-width: 0; }
+.trow .texpr { grid-area: expr; border: 0; border-radius: 0; background: transparent; min-height: 0; padding: 2px 4px 6px; font: 18px var(--mono); min-width: 0; width: 100%; }
+.trow .tnote:focus, .trow .texpr:focus { outline: none; }
+.tres { grid-area: res; font: 700 16px var(--mono); color: var(--accent); text-align: right; padding: 5px 0 0 8px; white-space: nowrap; max-width: 62vw; overflow: hidden; text-overflow: ellipsis; }
+.tres.var { color: var(--muted); font-weight: 600; }
+.tres.total { background: var(--to); border-radius: 6px; padding: 3px 6px; margin-top: 2px; }
+.tres.err { color: var(--err); font: 12.5px -apple-system, system-ui, sans-serif; white-space: normal; max-width: 60vw; }
+
+.vars { margin: 12px 0 0; }
+.vars summary { cursor: pointer; color: var(--muted); font-size: 14px; padding: 4px 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0; }
+.chip { border: 1px solid var(--line); background: var(--card); border-radius: 16px; padding: 5px 10px; font-size: 14px; cursor: pointer; }
+.chip b { color: var(--accent); font-weight: 600; margin-left: 4px; }
+
+/* ---------- клавиатура калькулятора ---------- */
+#keypad {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: var(--keypad); padding: 6px 6px calc(env(safe-area-inset-bottom) + 6px);
+  border-top: 1px solid var(--line); user-select: none; -webkit-user-select: none; touch-action: manipulation;
+}
+#keypad .strip { display: flex; gap: 6px; overflow-x: auto; padding: 0 0 6px; scrollbar-width: none; }
+#keypad .strip::-webkit-scrollbar { display: none; }
+#keypad .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; max-width: 560px; margin: 0 auto; }
+#keypad button {
+  border: 0; border-radius: 8px; background: var(--key); color: var(--text);
+  box-shadow: 0 1px 0 rgba(0,0,0,.25); cursor: pointer;
+}
+#keypad .grid button { height: 46px; font-size: 21px; }
+#keypad .grid button.op { background: var(--key2); }
+#keypad .grid button.enter { background: var(--accent); color: #fff; }
+#keypad .strip button { flex: none; height: 36px; padding: 0 12px; font-size: 15px; background: var(--key2); }
+#keypad button:active { filter: brightness(.85); }
+
+/* ---------- окно и уведомление ---------- */
+#modal { position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,.4); display: flex; align-items: flex-end; justify-content: center; }
+#modal .sheet {
+  background: var(--card); width: 100%; max-width: 640px; max-height: 85vh; overflow: auto;
+  border-radius: 16px 16px 0 0; padding: 16px 16px calc(env(safe-area-inset-bottom) + 16px);
+}
+#modal h2 { margin: 0 0 10px; font-size: 19px; }
+#modal pre { white-space: pre-wrap; font: 14px/1.45 -apple-system, system-ui, sans-serif; margin: 0 0 12px; }
+#modal .tape-item { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+#modal .tape-item span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
+#toast {
+  position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 20px); transform: translateX(-50%);
+  z-index: 40; background: rgba(30,30,30,.92); color: #fff; padding: 8px 16px; border-radius: 18px; font-size: 14px;
+}
