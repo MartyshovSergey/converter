@@ -175,8 +175,9 @@ function loadCategory() {
 
 function recalcConv() {
   const c = conv.current;
-  const from = c.units[Number(conv.from.value)], to = c.units[Number(conv.to.value)];
-  conv.memory[c.name] = [Number(conv.from.value), Number(conv.to.value)];
+  const fromIndex = Number(conv.from.value), toIndex = Number(conv.to.value);
+  const from = c.units[fromIndex], to = c.units[toIndex];
+  conv.memory[c.name] = [fromIndex, toIndex];
   settings.units = conv.memory;
   saveSettings();
   const d = digitsOf();
@@ -197,8 +198,9 @@ function recalcConv() {
   conv.info.textContent = info.join("\n");
   [...conv.list.children].forEach((li, i) => {
     const u = c.units[i];
+    li.hidden = i === toIndex;
     li.lastChild.textContent = b !== null ? fmt(u.fromBase(b), d, true) : "";
-    li.className = u === from ? "from" : u === to ? "to" : "";
+    li.className = i === fromIndex ? "from" : "";
   });
 }
 
@@ -344,6 +346,23 @@ function recalcGas() {
 
 const signed = (v, d) => (v > 0 ? "+" : "") + fmt(v, d, true);
 
+function soundSpeedCramer(t, humidity, pressureKPa) {
+  // O. Cramer (1993), eq. 15 and appendix A, DOI 10.1121/1.405827.
+  const co2 = 0.0004;
+  const p = pressureKPa * 1000;
+  const kelvin = t + 273.15;
+  const t2 = t * t;
+  const saturation = Math.exp(1.2811805e-5 * kelvin * kelvin - 0.019509874 * kelvin
+      + 34.04926034 - 6353.6311 / kelvin);
+  const water = humidity / 100 * (1.00062 + 3.14e-8 * p + 5.6e-7 * t2) * saturation / p;
+  return 331.5024 + 0.603055 * t - 0.000528 * t2
+      + (51.471935 + 0.1495874 * t - 0.000782 * t2) * water
+      + (-1.82e-7 + 3.73e-8 * t - 2.93e-10 * t2) * p
+      + (-85.20931 - 0.228525 * t + 5.91e-5 * t2) * co2
+      - 2.835149 * water * water - 2.15e-13 * p * p + 29.179762 * co2 * co2
+      + 0.000486 * water * p * co2;
+}
+
 const verifyCalcs = [
   {
     name: "Относительная погрешность",
@@ -439,6 +458,54 @@ const verifyCalcs = [
           (v.q > v.qmax ? "\n⚠ Точка расхода больше Qmax." : "")
       };
     }
+  },
+  {
+    name: "Скорость звука в воздухе",
+    title: "Расчёт скорости звука и сравнение с показанием расходомера",
+    methods: [{ value: "cramer", text: "Формула Крамера" },
+              { value: "dry", text: "Сухой воздух (идеальный газ)", hiddenFields: ["humidity", "pressure"] }],
+    fields: [["temp", "Температура воздуха, °C", "20"],
+             ["humidity", "Относительная влажность, %", ""],
+             ["pressure", "Абсолютное давление, кПа", "101,325"],
+             ["measured", "Показание расходомера, м/с", "", "Для сравнения с расчётной скоростью"],
+             ["limit", "Допуск ±, % (необязательно)", ""]],
+    compute(v, d, raw, method) {
+      if (v.temp === null) return { info: "Введите температуру воздуха в °C." };
+      if (v.temp <= -273.15) return { info: "Температура должна быть выше −273,15 °C." };
+      let speed, info;
+      if (method === "dry") {
+        speed = Math.sqrt(1.4 * 287.05) * Math.sqrt(v.temp + 273.15);
+        info = "Оценка для сухого воздуха по модели идеального газа.";
+      } else {
+        if (v.humidity === null || v.humidity < 0 || v.humidity > 100)
+          return { info: "Введите относительную влажность от 0 до 100 %." };
+        if (v.temp < 0 || v.temp > 30)
+          return { info: "Формула Крамера применима при температуре от 0 до 30 °C." };
+        if (v.pressure === null || v.pressure < 75 || v.pressure > 102)
+          return { info: "Введите абсолютное атмосферное давление от 75 до 102 кПа." };
+        speed = soundSpeedCramer(v.temp, v.humidity, v.pressure);
+        info = "Формула Крамера. Принята концентрация CO₂ 400 ppm.";
+      }
+      const result = { outs: [["Расчётная скорость звука, м/с", speed, fmt(speed, d, true)]], info };
+      const hasLimit = raw.limit.trim() !== "";
+      if (raw.measured.trim() === "" && !hasLimit) return result;
+      if (v.measured === null || v.measured < 0) {
+        result.info += "\nВведите показание расходомера в м/с (0 или больше).";
+        return result;
+      }
+      const delta = v.measured - speed, relative = delta / speed * 100;
+      result.outs.push(["Отклонение (показание − расчёт), м/с", delta, fmt(delta, d, true)],
+                       ["Относительная погрешность, %", relative, fmt(relative, d, true)]);
+      if (!hasLimit) return result;
+      if (v.limit === null || v.limit <= 0) {
+        result.info += "\nДопуск должен быть положительным числом.";
+        return result;
+      }
+      const withinLimit = roundDec(Math.abs(relative), 10) <= roundDec(v.limit, 10);
+      result.verdict = withinLimit ? "В пределах допуска" : "Допуск превышен";
+      result.status = withinLimit ? "ok" : "bad";
+      return result;
+    }
   }
 ];
 
@@ -456,7 +523,18 @@ const verify = { panels: [] };
   verifyCalcs.forEach((calc, ci) => {
     const panel = el("div", { hidden: true });
     panel.append(el("div", { class: "info", text: calc.title }));
-    const inputs = {};
+    const inputs = {}, rows = {};
+    let method;
+    if (calc.methods) {
+      const key = ci + ".method";
+      method = select(calc.methods, () => {
+        saved[key] = method.value;
+        store.set("verifyValues", saved);
+        recalc();
+      });
+      if (calc.methods.some(m => m.value === saved[key])) method.value = saved[key];
+      panel.append(field("Метод расчёта", method));
+    }
     for (const [id, label, def, hint] of calc.fields) {
       const key = ci + "." + id;
       const f = numField(saved[key] != null ? saved[key] : def, () => {
@@ -465,7 +543,8 @@ const verify = { panels: [] };
         recalc();
       });
       inputs[id] = f.input;
-      panel.append(field(label, f, hint));
+      rows[id] = field(label, f, hint);
+      panel.append(rows[id]);
     }
     const outBox = el("div");
     const verdict = el("div", { class: "info" });
@@ -474,7 +553,11 @@ const verify = { panels: [] };
     const recalc = () => {
       const d = digitsOf(), v = {}, raw = {};
       for (const id in inputs) { raw[id] = inputs[id].value; v[id] = parseNum(raw[id]); }
-      const r = calc.compute(v, d, raw);
+      if (method) {
+        const hidden = calc.methods[method.selectedIndex].hiddenFields || [];
+        for (const id in rows) rows[id].hidden = hidden.includes(id);
+      }
+      const r = calc.compute(v, d, raw, method && method.value);
       outBox.replaceChildren(...(r.outs || []).map(([label, val, text]) => {
         const b = resultBox(label);
         b.set(text, fmt(val, d, false));

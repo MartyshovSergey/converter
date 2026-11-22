@@ -1,6 +1,6 @@
 // Работа без интернета: файлы приложения кладутся в кэш при первой загрузке.
 // После правки файлов увеличьте VERSION, чтобы телефоны получили обновление.
-const VERSION = "uc-v1";
+const VERSION = "uc-v6";
 const FILES = [
   "./",
   "index.html",
@@ -11,7 +11,8 @@ const FILES = [
   "manifest.webmanifest",
   "icons/icon-180.png",
   "icons/icon-192.png",
-  "icons/icon-512.png"
+  "icons/icon-512.png",
+  "icons/icon-maskable-512.png"
 ];
 
 self.addEventListener("install", e => {

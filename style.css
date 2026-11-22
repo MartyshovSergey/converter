@@ -6,7 +6,6 @@
   --line: #e1e3ea;
   --accent: #0a64c8;
   --accent-weak: #e6f0fb;
-  --to: #fff3cd;
   --err: #c00000;
   --ok: #0a7d20;
   --key: #ffffff;
@@ -26,7 +25,6 @@
     --line: #2f2f33;
     --accent: #4ea1ff;
     --accent-weak: #102a47;
-    --to: #3a3216;
     --err: #ff6b6b;
     --ok: #4cd964;
     --key: #3a3a3c;
@@ -106,7 +104,6 @@ input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1
 .list li .v { font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; white-space: nowrap; }
 .list li .n { min-width: 0; overflow-wrap: anywhere; }
 .list li.from { background: var(--accent-weak); }
-.list li.to { background: var(--to); }
 .list li.head { background: var(--bg); color: var(--accent); font-weight: 700; font-size: 13px; cursor: default; }
 
 .seg { display: flex; background: var(--key2); border-radius: 10px; padding: 3px; gap: 3px; margin: 0 0 10px; }
@@ -134,7 +131,8 @@ body.keypad-open .tabbar { display: none; }
 .calc-bar { display: flex; gap: 6px; margin: 0 0 8px; overflow-x: auto; scrollbar-width: none; }
 .calc-bar::-webkit-scrollbar { display: none; }
 .calc-bar > * { flex: none; }
-.calc-bar select { width: auto; min-height: 34px; padding: 4px 28px 4px 10px; font-size: 14px; }
+/* 16px: при меньшем шрифте iPhone увеличивает страницу при открытии списка */
+.calc-bar select { width: auto; min-height: 34px; padding: 4px 28px 4px 10px; font-size: 16px; }
 .calc-sum {
   position: sticky; top: calc(env(safe-area-inset-top) + 48px); z-index: 4;
   display: flex; align-items: center; gap: 8px; margin: 0 0 8px;
